@@ -1,0 +1,157 @@
+Create a modern AI-powered web application that analyzes a floor plan image and suggests furniture products.
+
+Core Functionality
+
+The user can upload a floor plan image (PNG/JPG).
+
+The system sends the image to a YOLO-based object detection model trained to detect furniture types such as:
+
+bed
+
+sofa
+
+table
+
+chair
+
+wardrobe
+
+sink
+
+toilet
+
+TV
+
+dining table
+
+The model returns bounding boxes and labels for detected furniture.
+
+Display the annotated floor plan image with detected furniture highlighted.
+
+For each detected furniture item, generate furniture suggestions from online stores like:
+
+IKEA
+
+Amazon
+
+Show product cards with:
+
+product image
+
+price
+
+rating
+
+product link
+
+store name
+
+AI Integration
+
+Backend should load a YOLOv8 or YOLOv11 model
+
+Accept image input via API
+
+Return detection results as JSON:
+
+{
+ "objects":[
+  {"label":"sofa","confidence":0.92},
+  {"label":"bed","confidence":0.88}
+ ]
+}
+Product Recommendation Logic
+
+For each detected object:
+
+Search furniture APIs or product scraping using keywords like:
+
+“modern sofa”
+
+“queen size bed”
+
+“wooden dining table”
+
+Show 3–5 relevant products per item
+
+Tech Stack
+
+Frontend:
+
+React
+
+Tailwind CSS
+
+Framer Motion animations
+
+Backend:
+
+Python FastAPI or Node.js Express
+
+YOLO model inference
+
+REST API
+
+Database:
+
+Supabase or PostgreSQL (store uploads and results)
+
+UI Design
+
+The website should contain:
+
+1. Landing Page
+
+Hero section explaining the AI floor plan analyzer
+
+Upload button
+
+2. Upload Section
+
+Drag and drop floor plan upload
+
+Image preview
+
+3. Detection Result Page
+
+Annotated floor plan with bounding boxes
+
+Detected furniture list
+
+4. Recommendation Section
+
+Grid layout showing IKEA/Amazon furniture suggestions
+
+Extra Features
+
+Download annotated image
+
+Save projects
+
+Dark/light theme
+
+Mobile responsive UI
+
+Loading animation during AI processing
+
+Design Style
+
+Clean minimalist UI
+
+Inspired by IKEA design style
+
+Neutral colors (white, beige, soft gray)
+
+Output
+
+Generate a fully functioning full-stack project with:
+
+frontend folder
+
+backend API
+
+model inference integration
+
+example dataset
+
+clear setup instructions
