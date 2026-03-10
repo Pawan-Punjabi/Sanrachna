@@ -24,10 +24,6 @@ export function Home() {
               transition={{ duration: 0.8, ease: "easeOut" }}
               className="flex flex-col justify-center"
             >
-              <span className="inline-block py-1.5 px-4 rounded-full bg-secondary/20 text-foreground text-xs font-semibold tracking-wide uppercase mb-6 w-fit border border-secondary/40">
-                ✨ AI-Powered Space Design
-              </span>
-              
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-display font-bold tracking-tight text-balance leading-[1.1] mb-6">
                 Transform your <span className="text-secondary">room</span> into your <span className="text-accent">dream space</span>
               </h1>
