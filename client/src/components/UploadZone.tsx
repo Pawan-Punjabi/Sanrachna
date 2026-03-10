@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { UploadCloud, Image as ImageIcon, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
+import { UploadCloud, Image as ImageIcon, CheckCircle2, Loader2, AlertCircle, Scan } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUploadFloorPlan } from "@/hooks/use-floor-plans";
 import { useLocation } from "wouter";
