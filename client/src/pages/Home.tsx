@@ -57,7 +57,7 @@ export function Home() {
                   <img 
                     src={heroMockup}
                     alt="App mockup showing floor plan analysis"
-                    className="w-full rounded-2xl shadow-2xl border border-border/50 dark:brightness-0 dark:invert"
+                    className="w-full rounded-2xl shadow-2xl border border-border/50 dark:bg-white dark:p-4 dark:rounded-3xl"
                   />
                 </motion.div>
 

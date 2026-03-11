@@ -15,11 +15,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <img 
               src={sanrachnaLogo}
               alt="Sanrachna logo"
-              className="h-8 group-hover:scale-105 transition-transform duration-300 dark:invert"
+              className="h-12 group-hover:scale-105 transition-transform duration-300 dark:invert"
             />
-            <span className="font-display font-bold text-lg tracking-tight text-foreground hidden sm:inline-block">
-              Sanrachna
-            </span>
           </Link>
           
           <div className="flex items-center gap-6">
