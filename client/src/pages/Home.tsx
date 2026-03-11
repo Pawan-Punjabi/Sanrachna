@@ -1,7 +1,6 @@
 import { Layout } from "@/components/Layout";
 import { UploadZone } from "@/components/UploadZone";
 import { motion } from "framer-motion";
-import illustrationArt from "@assets/image_1773167663264.png";
 import heroMockup from "@assets/image_1773167474214.png";
 
 export function Home() {
@@ -58,23 +57,10 @@ export function Home() {
                   <img 
                     src={heroMockup}
                     alt="App mockup showing floor plan analysis"
-                    className="w-full rounded-2xl shadow-2xl border border-border/50"
+                    className="w-full rounded-2xl shadow-2xl border border-border/50 dark:brightness-0 dark:invert"
                   />
                 </motion.div>
 
-                {/* Illustration overlay bottom right */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
-                  className="absolute -bottom-8 -right-8 w-48 h-48 rounded-2xl overflow-hidden shadow-lg border border-white/20 bg-card"
-                >
-                  <img 
-                    src={illustrationArt}
-                    alt="Team working on space design"
-                    className="w-full h-full object-cover"
-                  />
-                </motion.div>
               </div>
             </motion.div>
           </div>
@@ -101,20 +87,17 @@ export function Home() {
                 {
                   step: "01",
                   title: "Upload Your Floor Plan",
-                  desc: "Share a clear image of your room layout. Works with sketches, photos, or digital plans.",
-                  icon: "📸"
+                  desc: "Share a clear image of your room layout. Works with sketches, photos, or digital plans."
                 },
                 {
                   step: "02",
-                  title: "AI Analyzes Your Space",
-                  desc: "Our AI detects furniture zones, dimensions, and spatial characteristics in seconds.",
-                  icon: "🧠"
+                  title: "Analyze Your Space",
+                  desc: "We detect furniture zones, dimensions, and spatial characteristics in seconds."
                 },
                 {
                   step: "03",
                   title: "Get Recommendations",
-                  desc: "Discover curated furniture picks from IKEA, Amazon, and more - perfectly sized for you.",
-                  icon: "🎯"
+                  desc: "Discover curated furniture picks from IKEA, Amazon, and more - perfectly sized for you."
                 }
               ].map((item, i) => (
                 <motion.div 
@@ -125,7 +108,6 @@ export function Home() {
                   viewport={{ once: true }}
                   className="flex flex-col items-start group"
                 >
-                  <div className="text-4xl mb-4">{item.icon}</div>
                   <div className="w-12 h-12 rounded-full border-2 border-secondary bg-secondary/10 text-secondary flex items-center justify-center font-display text-lg font-bold mb-6 group-hover:bg-secondary/20 transition-colors">
                     {item.step}
                   </div>
