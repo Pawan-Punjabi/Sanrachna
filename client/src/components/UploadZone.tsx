@@ -56,7 +56,7 @@ export function UploadZone() {
           rounded-3xl border-2 border-dashed
           transition-all duration-500 ease-out
           flex flex-col items-center justify-center
-          min-h-[400px] p-8 text-center
+          min-h-[280px] p-8 text-center
           ${isDragActive ? 'border-accent bg-accent/5 scale-[1.02]' : 'border-border bg-card hover:border-primary/30 hover:bg-secondary/30'}
           ${isDragReject || error ? 'border-destructive bg-destructive/5' : ''}
           ${isScanning ? 'pointer-events-none border-primary/20 bg-secondary/50' : ''}

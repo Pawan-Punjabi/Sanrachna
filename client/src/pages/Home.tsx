@@ -10,10 +10,10 @@ export function Home() {
       <div className="flex-1 flex flex-col relative">
         {/* Hero Section with Split Layout */}
         <section className="relative z-10 min-h-screen flex items-center justify-center px-4 sm:px-6 py-20 lg:py-0 overflow-hidden">
-          {/* Background gradient effect */}
+          {/* Subtle background accents */}
           <div className="absolute inset-0 z-0">
-            <div className="absolute -top-40 -right-40 w-96 h-96 bg-secondary rounded-full opacity-30 blur-3xl" />
-            <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-accent rounded-full opacity-20 blur-3xl" />
+            <div className="absolute -top-40 -right-40 w-96 h-96 bg-accent rounded-full opacity-5 blur-3xl" />
+            <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-muted rounded-full opacity-10 blur-3xl" />
           </div>
 
           <div className="max-w-7xl w-full mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
@@ -24,8 +24,8 @@ export function Home() {
               transition={{ duration: 0.8, ease: "easeOut" }}
               className="flex flex-col justify-center"
             >
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-display font-bold tracking-tight text-balance leading-[1.1] mb-6">
-                Transform your <span className="text-secondary">room</span> into your <span className="text-accent">dream space</span>
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-display font-bold tracking-tight text-balance leading-[1.1] mb-6 text-foreground">
+                Transform your <span className="text-accent">room</span> into your dream space
               </h1>
               
               <p className="text-lg text-muted-foreground text-balance max-w-lg mb-10 leading-relaxed">
