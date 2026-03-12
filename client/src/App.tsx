@@ -6,14 +6,19 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 
 import { Home } from "@/pages/Home";
-import { Result } from "@/pages/Result";
+import { Analyzer } from "@/pages/Analyzer";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/analyzer" component={() => <Analyzer />} />
+      <Route path="/analyzer/:id">
+        {(params) => <Analyzer id={parseInt(params.id, 10)} />}
+      </Route>
+      {/* Legacy route — redirect to analyzer */}
       <Route path="/floor-plan/:id">
-        {(params) => <Result id={parseInt(params.id, 10)} />}
+        {(params) => <Analyzer id={parseInt(params.id, 10)} />}
       </Route>
       <Route component={NotFound} />
     </Switch>

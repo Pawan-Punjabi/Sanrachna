@@ -22,10 +22,9 @@ export function UploadZone() {
 
     uploadMutation.mutate(file, {
       onSuccess: (data) => {
-        // Adding a slight delay to let the success animation play
         setTimeout(() => {
-          setLocation(`/floor-plan/${data.id}`);
-        }, 1500);
+          setLocation(`/analyzer/${data.id}`);
+        }, 1200);
       },
       onError: (err) => {
         setError(err.message || "Failed to analyze the floor plan.");

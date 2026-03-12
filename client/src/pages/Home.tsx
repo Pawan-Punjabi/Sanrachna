@@ -1,121 +1,163 @@
 import { Layout } from "@/components/Layout";
 import { UploadZone } from "@/components/UploadZone";
 import { motion } from "framer-motion";
-import heroMockup from "@assets/image_1773167474214.png";
+import { Link } from "wouter";
+import { ArrowRight, UploadCloud, ScanSearch, ShoppingBag } from "lucide-react";
 
 export function Home() {
   return (
     <Layout>
       <div className="flex-1 flex flex-col relative">
-        {/* Hero Section with Split Layout */}
-        <section className="relative z-10 min-h-screen flex items-center justify-center px-4 sm:px-6 py-20 lg:py-0 overflow-hidden">
-          {/* Subtle background accents */}
-          <div className="absolute inset-0 z-0">
-            <div className="absolute -top-40 -right-40 w-96 h-96 bg-accent rounded-full opacity-5 blur-3xl" />
-            <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-muted rounded-full opacity-10 blur-3xl" />
-          </div>
+        {/* Hero Section */}
+        <section className="relative z-10 min-h-[calc(100vh-80px)] flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16 overflow-hidden">
+          <div className="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 xl:gap-24 items-center">
 
-          <div className="max-w-7xl w-full mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            {/* Left Column - Text & CTA */}
-            <motion.div 
-              initial={{ opacity: 0, x: -30 }}
+            {/* Left — Headline & description */}
+            <motion.div
+              initial={{ opacity: 0, x: -24 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
               className="flex flex-col justify-center"
             >
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-display font-bold tracking-tight text-balance leading-[1.1] mb-6 text-foreground">
-                Transform your <span className="text-accent">room</span> into your dream space
+              <h1 className="text-5xl sm:text-6xl lg:text-[4rem] xl:text-[4.5rem] font-display font-bold tracking-tight leading-[1.08] mb-6 text-foreground">
+                Transform your{" "}
+                <span className="text-accent">room</span>{" "}
+                into your dream space
               </h1>
-              
-              <p className="text-lg text-muted-foreground text-balance max-w-lg mb-10 leading-relaxed">
-                Upload your floor plan and let our AI analyze the layout, detect furniture, and recommend premium pieces perfectly sized for your space.
+
+              <p className="text-lg text-muted-foreground max-w-md mb-10 leading-relaxed">
+                Upload your floor plan and get intelligent furniture detection with curated product recommendations from top stores — tailored to your exact space.
               </p>
 
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-              >
-                <UploadZone />
-              </motion.div>
-            </motion.div>
-
-            {/* Right Column - Hero Images */}
-            <motion.div 
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
-              className="relative h-full hidden lg:flex items-center justify-center"
-            >
-              <div className="relative w-full">
-                {/* Main mockup image */}
-                <motion.div
-                  animate={{ y: [0, -10, 0] }}
-                  transition={{ duration: 4, repeat: Infinity }}
-                  className="relative"
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link
+                  href="/analyzer"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-medium rounded-lg hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200 w-fit"
                 >
-                  <img 
-                    src={heroMockup}
-                    alt="App mockup showing floor plan analysis"
-                    className="w-full rounded-2xl shadow-2xl border border-border/50 dark:bg-white dark:p-4 dark:rounded-3xl"
-                  />
-                </motion.div>
-
+                  Start Analyzing
+                  <ArrowRight size={18} />
+                </Link>
+                <a
+                  href="#how-it-works"
+                  className="inline-flex items-center gap-2 px-6 py-3 border border-border text-foreground font-medium rounded-lg hover:bg-muted transition-all duration-200 w-fit"
+                >
+                  How it works
+                </a>
               </div>
             </motion.div>
+
+            {/* Right — Upload Zone */}
+            <motion.div
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
+              className="flex flex-col"
+            >
+              <div className="bg-card border border-border rounded-2xl p-8 shadow-sm">
+                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-widest mb-5">
+                  Quick Analyze
+                </p>
+                <UploadZone />
+              </div>
+            </motion.div>
+
           </div>
         </section>
 
-        {/* How It Works Section */}
-        <section id="how-it-works" className="relative z-10 py-24 bg-card/50 border-t border-border">
+        {/* How It Works */}
+        <section id="how-it-works" className="relative z-10 py-28 border-t border-border">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div 
+
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className="text-center mb-16"
+              className="mb-16"
             >
-              <h2 className="text-4xl lg:text-5xl font-display font-bold mb-4">How It Works</h2>
-              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                Three simple steps to transform your space with AI-powered insights
+              <p className="text-sm font-semibold uppercase tracking-widest text-accent mb-3">Process</p>
+              <h2 className="text-4xl lg:text-5xl font-display font-bold mb-4 max-w-xl">
+                Three steps to your ideal space
+              </h2>
+              <p className="text-muted-foreground text-lg max-w-xl leading-relaxed">
+                From raw floor plan to curated furniture selection in moments.
               </p>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
                 {
                   step: "01",
+                  icon: UploadCloud,
                   title: "Upload Your Floor Plan",
-                  desc: "Share a clear image of your room layout. Works with sketches, photos, or digital plans."
+                  desc: "Share a JPG or PNG of your room layout — hand-drawn sketches, architectural drawings, or photos all work.",
+                  bg: "bg-muted"
                 },
                 {
                   step: "02",
-                  title: "Analyze Your Space",
-                  desc: "We detect furniture zones, dimensions, and spatial characteristics in seconds."
+                  icon: ScanSearch,
+                  title: "Space Detection",
+                  desc: "We scan your layout to detect furniture zones, room dimensions, and spatial boundaries with precision.",
+                  bg: "bg-accent/5"
                 },
                 {
                   step: "03",
-                  title: "Get Recommendations",
-                  desc: "Discover curated furniture picks from IKEA, Amazon, and more - perfectly sized for you."
+                  icon: ShoppingBag,
+                  title: "Curated Recommendations",
+                  desc: "Receive hand-picked furniture suggestions from IKEA, Amazon, and Wayfair — matched to your room's scale and style.",
+                  bg: "bg-muted"
                 }
               ].map((item, i) => (
-                <motion.div 
+                <motion.div
                   key={i}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: i * 0.1 }}
+                  transition={{ duration: 0.55, delay: i * 0.1 }}
                   viewport={{ once: true }}
-                  className="flex flex-col items-start group"
+                  className={`relative ${item.bg} rounded-2xl p-8 border border-border group hover:border-accent/30 transition-colors duration-300 overflow-hidden`}
                 >
-                  <div className="w-12 h-12 rounded-full border-2 border-secondary bg-secondary/10 text-secondary flex items-center justify-center font-display text-lg font-bold mb-6 group-hover:bg-secondary/20 transition-colors">
+                  {/* Large background step number */}
+                  <span className="absolute -bottom-4 -right-2 text-[7rem] font-display font-bold text-foreground/5 leading-none select-none pointer-events-none">
                     {item.step}
+                  </span>
+
+                  <div className="relative z-10">
+                    <div className="w-12 h-12 rounded-xl bg-background border border-border flex items-center justify-center mb-6 group-hover:border-accent/40 transition-colors shadow-sm">
+                      <item.icon size={22} className="text-accent" strokeWidth={1.5} />
+                    </div>
+
+                    <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
+                      Step {item.step}
+                    </div>
+
+                    <h3 className="font-display text-xl font-bold mb-3 leading-snug">
+                      {item.title}
+                    </h3>
+                    <p className="text-muted-foreground leading-relaxed text-sm">
+                      {item.desc}
+                    </p>
                   </div>
-                  <h3 className="font-display text-2xl font-bold mb-3">{item.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{item.desc}</p>
                 </motion.div>
               ))}
             </div>
+
+            {/* CTA below How It Works */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              viewport={{ once: true }}
+              className="mt-12 flex justify-center"
+            >
+              <Link
+                href="/analyzer"
+                className="inline-flex items-center gap-2 px-7 py-3.5 bg-primary text-primary-foreground font-medium rounded-lg hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200"
+              >
+                Try the Analyzer
+                <ArrowRight size={18} />
+              </Link>
+            </motion.div>
+
           </div>
         </section>
       </div>

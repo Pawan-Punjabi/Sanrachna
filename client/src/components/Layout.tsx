@@ -15,13 +15,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <img 
               src={sanrachnaLogo}
               alt="Sanrachna logo"
-              className="h-12 group-hover:scale-105 transition-transform duration-300 dark:invert"
+              className="h-14 group-hover:scale-105 transition-transform duration-300 dark:invert"
             />
           </Link>
           
           <div className="flex items-center gap-6">
             <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
-              <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors duration-200">Analyzer</Link>
+              <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors duration-200">Home</Link>
+              <Link href="/analyzer" className="text-muted-foreground hover:text-foreground transition-colors duration-200">Analyzer</Link>
               <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors duration-200">How it works</a>
             </nav>
             
