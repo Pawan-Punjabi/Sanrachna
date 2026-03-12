@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { Layout } from "@/components/Layout";
 import { UploadZone } from "@/components/UploadZone";
 import { useFloorPlan } from "@/hooks/use-floor-plans";
 import { ProductCard } from "@/components/ProductCard";
-import { ArrowLeft, Layers, Search, RefreshCw, Maximize } from "lucide-react";
+import { ArrowLeft, Layers, Search, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
+import { buildUrl, api } from "@shared/routes";
 
 interface AnalyzerProps {
   id?: number;
@@ -16,6 +17,19 @@ export function Analyzer({ id }: AnalyzerProps) {
   const [, setLocation] = useLocation();
   const { data: plan, isLoading, error } = useFloorPlan(id ?? 0);
   const [activeDetectionId, setActiveDetectionId] = useState<number | null>(null);
+  const idRef = useRef(id);
+  idRef.current = id;
+
+  // Delete floor plan and its image file when the user navigates away
+  useEffect(() => {
+    if (!id) return;
+    return () => {
+      const planId = idRef.current;
+      if (!planId) return;
+      const url = buildUrl(api.floorPlans.delete.path, { id: planId });
+      fetch(url, { method: "DELETE", credentials: "include" }).catch(() => {});
+    };
+  }, [id]);
 
   // No ID — show the upload page
   if (!id) {

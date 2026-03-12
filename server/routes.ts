@@ -66,7 +66,21 @@ export async function registerRoutes(
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid ID" });
       }
+
+      // Get plan first so we can delete the image file
+      const plan = await storage.getFloorPlan(id);
       
+      if (plan?.imageUrl) {
+        const filePath = path.join(process.cwd(), plan.imageUrl);
+        try {
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+          }
+        } catch (fileErr) {
+          console.warn("Could not delete image file:", fileErr);
+        }
+      }
+
       await storage.deleteFloorPlan(id);
       res.status(204).end();
     } catch (err) {
@@ -81,7 +95,7 @@ export async function registerRoutes(
         return res.status(400).json({ message: "No image file provided" });
       }
 
-      const imageUrl = `/uploads/\${req.file.filename}`;
+      const imageUrl = "/uploads/" + req.file.filename;
       const name = req.file.originalname;
 
       // 1. Create Floor Plan record
@@ -91,8 +105,6 @@ export async function registerRoutes(
       });
 
       // 2. Mock YOLO Object Detection
-      // In a real app, you would send the image to a YOLOv8 Python service or use ONNX runtime here.
-      // We will generate some dummy detections for the MVP.
       const mockDetections = [
         { label: "bed", confidence: 0.92, boxX: 0.1, boxY: 0.1, boxW: 0.3, boxH: 0.4 },
         { label: "sofa", confidence: 0.88, boxX: 0.5, boxY: 0.2, boxW: 0.4, boxH: 0.2 },
@@ -142,7 +154,7 @@ function getMockProducts(label: string) {
 
   return [
     {
-      name: `Modern \${label.charAt(0).toUpperCase() + label.slice(1)}`,
+      name: "Modern " + label.charAt(0).toUpperCase() + label.slice(1),
       price: "$299.99",
       rating: 4.5,
       storeName: "IKEA",
@@ -150,7 +162,7 @@ function getMockProducts(label: string) {
       imageUrl: images[label] || defaultImage,
     },
     {
-      name: `Minimalist \${label.charAt(0).toUpperCase() + label.slice(1)}`,
+      name: "Minimalist " + label.charAt(0).toUpperCase() + label.slice(1),
       price: "$199.99",
       rating: 4.2,
       storeName: "Amazon",
@@ -158,7 +170,7 @@ function getMockProducts(label: string) {
       imageUrl: images[label] || defaultImage,
     },
     {
-      name: `Premium \${label.charAt(0).toUpperCase() + label.slice(1)}`,
+      name: "Premium " + label.charAt(0).toUpperCase() + label.slice(1),
       price: "$499.99",
       rating: 4.8,
       storeName: "Wayfair",

@@ -10,12 +10,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col font-sans">
       <header className="sticky top-0 z-50 glass backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-28 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
             <img 
               src={sanrachnaLogo}
               alt="Sanrachna logo"
-              className="h-14 group-hover:scale-105 transition-transform duration-300 dark:invert"
+              className="h-20 group-hover:scale-105 transition-transform duration-300 dark:invert"
             />
           </Link>
           
@@ -23,7 +23,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
               <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors duration-200">Home</Link>
               <Link href="/analyzer" className="text-muted-foreground hover:text-foreground transition-colors duration-200">Analyzer</Link>
-              <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors duration-200">How it works</a>
+              <a href="/#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors duration-200">How it works</a>
             </nav>
             
             <div className="w-px h-6 bg-border hidden md:block"></div>
