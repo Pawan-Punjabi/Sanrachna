@@ -65,7 +65,7 @@ export function Home() {
         </section>
 
         {/* How It Works */}
-        <section id="how-it-works" className="relative z-10 py-28 border-t border-border">
+        <section id="how-it-works" className="relative z-10 pt-24 pb-10 border-t border-border">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             <motion.div

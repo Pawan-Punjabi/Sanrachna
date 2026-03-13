@@ -94,4 +94,14 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  /* Tint logo to accent orange (hsl 25 50% 40%) in light mode */
+  .logo-accent {
+    filter: brightness(0) saturate(100%) invert(38%) sepia(55%) saturate(600%) hue-rotate(350deg) brightness(92%);
+  }
+
+  /* In dark mode, keep it white */
+  .dark .logo-accent {
+    filter: invert(1);
+  }
 }

@@ -14,6 +14,8 @@ import { Pricing } from "@/pages/Pricing";
 function ScrollToTop() {
   const [location] = useLocation();
   useEffect(() => {
+    // Skip scroll-to-top when navigating to a hash anchor (e.g. /#how-it-works)
+    if (window.location.hash) return;
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [location]);
   return null;

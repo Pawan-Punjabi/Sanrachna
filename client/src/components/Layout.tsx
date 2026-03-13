@@ -17,7 +17,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <img
               src={sanrachnaLogo}
               alt="Sanrachna logo"
-              className="h-20 group-hover:scale-105 transition-transform duration-300 dark:invert"
+              className="h-20 group-hover:scale-105 transition-transform duration-300 logo-accent"
             />
           </Link>
 
@@ -77,11 +77,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {children}
       </main>
 
-      <footer className="border-t border-border/50 py-12 mt-20 bg-card/50">
+      <footer className="border-t border-border/50 py-10 mt-0 bg-card/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="font-display font-bold text-accent">Sanrachna</span>
-            <span className="text-sm text-muted-foreground">© {new Date().getFullYear()}</span>
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <span className="font-display font-bold">Sanrachna</span>
+            <span className="text-sm">© {new Date().getFullYear()}</span>
           </div>
           <p className="text-sm text-muted-foreground text-balance text-center">
             Creating beautiful spaces through thoughtful design.
