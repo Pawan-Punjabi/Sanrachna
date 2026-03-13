@@ -24,6 +24,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors duration-200">Home</Link>
               <Link href="/analyzer" className="text-muted-foreground hover:text-foreground transition-colors duration-200">Analyzer</Link>
               <a href="/#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors duration-200">How it works</a>
+              <Link href="/pricing" className="text-muted-foreground hover:text-foreground transition-colors duration-200">Pricing</Link>
             </nav>
             
             <div className="w-px h-6 bg-border hidden md:block"></div>

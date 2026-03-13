@@ -8,6 +8,7 @@ import NotFound from "@/pages/not-found";
 
 import { Home } from "@/pages/Home";
 import { Analyzer } from "@/pages/Analyzer";
+import { Pricing } from "@/pages/Pricing";
 
 function ScrollToTop() {
   const [location] = useLocation();
@@ -30,6 +31,7 @@ function Router() {
         <Route path="/floor-plan/:id">
           {(params) => <Analyzer id={parseInt(params.id, 10)} />}
         </Route>
+        <Route path="/pricing" component={Pricing} />
         <Route component={NotFound} />
       </Switch>
     </>
