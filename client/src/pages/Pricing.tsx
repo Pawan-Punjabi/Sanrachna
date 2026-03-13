@@ -118,43 +118,8 @@ export function Pricing() {
   return (
     <Layout>
       <div className="flex-1 flex flex-col">
-        {/* Hero */}
-        <section className="relative py-20 lg:py-28 px-4 sm:px-6 lg:px-8 border-b border-border overflow-hidden">
-          <div className="absolute inset-0 z-0">
-            <div className="absolute -top-32 right-0 w-[500px] h-[500px] bg-accent rounded-full opacity-[0.04] blur-3xl" />
-            <div className="absolute -bottom-32 left-0 w-[400px] h-[400px] bg-muted rounded-full opacity-20 blur-3xl" />
-          </div>
-          <div className="relative z-10 max-w-3xl mx-auto text-center">
-            <motion.p
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="text-sm font-semibold uppercase tracking-widest text-accent mb-4"
-            >
-              Pricing
-            </motion.p>
-            <motion.h1
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, delay: 0.05 }}
-              className="text-5xl sm:text-6xl lg:text-7xl font-display font-bold tracking-tight leading-[1.08] mb-6"
-            >
-              Simple, honest pricing
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, delay: 0.1 }}
-              className="text-lg text-muted-foreground leading-relaxed max-w-xl mx-auto"
-            >
-              Start for free and upgrade when you need more power. No hidden
-              fees, no complicated tiers.
-            </motion.p>
-          </div>
-        </section>
-
         {/* Pricing Cards */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <section className="py-16 px-4 sm:px-6 lg:px-8">
           <div className="max-w-5xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 mb-20">
               {/* Free Card */}
