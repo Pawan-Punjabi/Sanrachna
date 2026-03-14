@@ -1,77 +1,83 @@
-import { pgTable, text, serial, integer, doublePrecision, timestamp } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const floorPlans = pgTable("floor_plans", {
-  id: serial("id").primaryKey(),
-  imageUrl: text("image_url").notNull(),
-  name: text("name").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-});
+// ─── Supabase-aligned types ───────────────────────────────────────────────────
 
-export const detections = pgTable("detections", {
-  id: serial("id").primaryKey(),
-  floorPlanId: integer("floor_plan_id").notNull(),
-  label: text("label").notNull(),
-  confidence: doublePrecision("confidence").notNull(),
-  boxX: doublePrecision("box_x").notNull(),
-  boxY: doublePrecision("box_y").notNull(),
-  boxW: doublePrecision("box_w").notNull(),
-  boxH: doublePrecision("box_h").notNull(),
-});
+export interface User {
+  id: string;
+  email: string;
+  plan: "free" | "pro";
+  created_at: string;
+}
 
-export const suggestedProducts = pgTable("suggested_products", {
-  id: serial("id").primaryKey(),
-  detectionId: integer("detection_id").notNull(),
-  name: text("name").notNull(),
-  price: text("price").notNull(),
-  rating: doublePrecision("rating"),
-  storeName: text("store_name").notNull(),
-  productLink: text("product_link").notNull(),
-  imageUrl: text("image_url").notNull(),
-});
+export interface FloorPlan {
+  id: number;
+  user_id: string | null;
+  image_url: string;
+  name: string;
+  uploaded_at: string;
+}
 
-export const floorPlansRelations = relations(floorPlans, ({ many }) => ({
-  detections: many(detections),
-}));
+export interface Detection {
+  id: number;
+  floor_plan_id: number;
+  furniture_label: string;
+  bounding_box: { x: number; y: number; w: number; h: number };
+  confidence_score: number;
+}
 
-export const detectionsRelations = relations(detections, ({ one, many }) => ({
-  floorPlan: one(floorPlans, {
-    fields: [detections.floorPlanId],
-    references: [floorPlans.id],
-  }),
-  products: many(suggestedProducts),
-}));
+export interface ProductSuggestion {
+  id: number;
+  detection_id: number;
+  store_name: string;
+  product_name: string;
+  price: string;
+  rating: number | null;
+  product_url: string;
+  product_image_url: string;
+  created_at: string;
+}
 
-export const suggestedProductsRelations = relations(suggestedProducts, ({ one }) => ({
-  detection: one(detections, {
-    fields: [suggestedProducts.detectionId],
-    references: [detections.id],
-  }),
-}));
+// ─── Composed / extended types ────────────────────────────────────────────────
 
-export const insertFloorPlanSchema = createInsertSchema(floorPlans).omit({ id: true, createdAt: true });
-export const insertDetectionSchema = createInsertSchema(detections).omit({ id: true });
-export const insertSuggestedProductSchema = createInsertSchema(suggestedProducts).omit({ id: true });
-
-export type FloorPlan = typeof floorPlans.$inferSelect;
-export type InsertFloorPlan = z.infer<typeof insertFloorPlanSchema>;
-
-export type Detection = typeof detections.$inferSelect;
-export type InsertDetection = z.infer<typeof insertDetectionSchema>;
-
-export type SuggestedProduct = typeof suggestedProducts.$inferSelect;
-export type InsertSuggestedProduct = z.infer<typeof insertSuggestedProductSchema>;
-
-// Extended types for API responses
 export type DetectionWithProducts = Detection & {
-  products: SuggestedProduct[];
+  products: ProductSuggestion[];
 };
 
 export type FloorPlanWithDetails = FloorPlan & {
   detections: DetectionWithProducts[];
 };
+
+// ─── Legacy-compatible normalised shapes (returned by the Express API) ────────
+// The frontend expects camelCase keys; the server's normalisePlan() converts.
+
+export interface NormalisedProduct {
+  id: number;
+  name: string;
+  price: string;
+  rating: number | null;
+  storeName: string;
+  productLink: string;
+  imageUrl: string;
+}
+
+export interface NormalisedDetection {
+  id: number;
+  label: string;
+  confidence: number;
+  boxX: number;
+  boxY: number;
+  boxW: number;
+  boxH: number;
+  products: NormalisedProduct[];
+}
+
+export interface NormalisedFloorPlan {
+  id: number;
+  name: string;
+  imageUrl: string;
+  createdAt: string;
+  detections: NormalisedDetection[];
+}
 
 export type UploadResponse = {
   id: number;
@@ -79,3 +85,32 @@ export type UploadResponse = {
   name: string;
   message: string;
 };
+
+// ─── Zod schemas (for server-side validation) ─────────────────────────────────
+
+export const insertFloorPlanSchema = z.object({
+  image_url: z.string().min(1),
+  name: z.string().min(1),
+  user_id: z.string().uuid().nullable().optional(),
+});
+
+export const insertDetectionSchema = z.object({
+  floor_plan_id: z.number().int().positive(),
+  furniture_label: z.string().min(1),
+  bounding_box: z.object({ x: z.number(), y: z.number(), w: z.number(), h: z.number() }),
+  confidence_score: z.number().min(0).max(1),
+});
+
+export const insertProductSuggestionSchema = z.object({
+  detection_id: z.number().int().positive(),
+  store_name: z.string().min(1),
+  product_name: z.string().min(1),
+  price: z.string().min(1),
+  rating: z.number().nullable().optional(),
+  product_url: z.string().url(),
+  product_image_url: z.string().url(),
+});
+
+export type InsertFloorPlan = z.infer<typeof insertFloorPlanSchema>;
+export type InsertDetection = z.infer<typeof insertDetectionSchema>;
+export type InsertProductSuggestion = z.infer<typeof insertProductSuggestionSchema>;

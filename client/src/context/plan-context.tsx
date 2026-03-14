@@ -1,4 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { useAuth } from "@/context/auth-context";
+import { upgradeToPro, downgradeToFree } from "@/lib/supabase-helpers";
 
 type Plan = "free" | "pro";
 
@@ -12,7 +14,10 @@ interface PlanContextValue {
 const PlanContext = createContext<PlanContextValue | null>(null);
 
 export function PlanProvider({ children }: { children: React.ReactNode }) {
-  const [plan, setPlanState] = useState<Plan>(() => {
+  const { user, plan: authPlan, isAuthenticated, refreshPlan } = useAuth();
+
+  // Local fallback plan for unauthenticated users (localStorage)
+  const [localPlan, setLocalPlan] = useState<Plan>(() => {
     try {
       const stored = localStorage.getItem("sanrachna-plan");
       return stored === "pro" ? "pro" : "free";
@@ -21,17 +26,44 @@ export function PlanProvider({ children }: { children: React.ReactNode }) {
     }
   });
 
-  const setPlan = (newPlan: Plan) => {
-    setPlanState(newPlan);
-    try {
-      localStorage.setItem("sanrachna-plan", newPlan);
-    } catch {}
+  // Sync local plan whenever auth plan changes
+  useEffect(() => {
+    if (isAuthenticated) {
+      setLocalPlan(authPlan);
+    }
+  }, [authPlan, isAuthenticated]);
+
+  const currentPlan: Plan = isAuthenticated ? authPlan : localPlan;
+
+  const setPlan = async (newPlan: Plan) => {
+    if (isAuthenticated && user) {
+      try {
+        if (newPlan === "pro") {
+          await upgradeToPro(user.id);
+        } else {
+          await downgradeToFree(user.id);
+        }
+        await refreshPlan();
+      } catch (err) {
+        console.error("Failed to update plan in DB:", err);
+      }
+    } else {
+      setLocalPlan(newPlan);
+      try {
+        localStorage.setItem("sanrachna-plan", newPlan);
+      } catch {}
+    }
   };
 
-  const togglePlan = () => setPlan(plan === "free" ? "pro" : "free");
+  const togglePlan = () => setPlan(currentPlan === "free" ? "pro" : "free");
 
   return (
-    <PlanContext.Provider value={{ plan, isPro: plan === "pro", togglePlan, setPlan }}>
+    <PlanContext.Provider value={{
+      plan: currentPlan,
+      isPro: currentPlan === "pro",
+      togglePlan,
+      setPlan,
+    }}>
       {children}
     </PlanContext.Provider>
   );

@@ -4,18 +4,24 @@ import { UploadCloud, Image as ImageIcon, CheckCircle2, AlertCircle, Scan, Zap }
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
 import { usePlan } from "@/context/plan-context";
+import { useAuth } from "@/context/auth-context";
 import { api } from "@shared/routes";
 import type { UploadResponse } from "@shared/schema";
 
 type UploadState = "idle" | "scanning" | "success" | "error";
 
-async function uploadFile(file: File): Promise<UploadResponse> {
+async function uploadFile(file: File, accessToken?: string): Promise<UploadResponse> {
   const formData = new FormData();
   formData.append("image", file);
+
+  const headers: Record<string, string> = {};
+  if (accessToken) headers["Authorization"] = "Bearer " + accessToken;
+
   const res = await fetch(api.floorPlans.upload.path, {
     method: api.floorPlans.upload.method,
     body: formData,
     credentials: "include",
+    headers,
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
@@ -30,6 +36,7 @@ export function UploadZone() {
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
   const { isPro } = usePlan();
+  const { session } = useAuth();
 
   const maxFiles = isPro ? 10 : 1;
 
@@ -46,11 +53,12 @@ export function UploadZone() {
     const files = acceptedFiles.slice(0, maxFiles);
     setProgress({ done: 0, total: files.length });
 
+    const accessToken = session?.access_token;
     let firstId: number | null = null;
 
     for (const file of files) {
       try {
-        const data = await uploadFile(file);
+        const data = await uploadFile(file, accessToken);
         if (firstId === null) firstId = data.id;
         setProgress(p => ({ ...p, done: p.done + 1 }));
       } catch (err: any) {
@@ -66,7 +74,7 @@ export function UploadZone() {
         setLocation(`/analyzer/${firstId}`);
       }, 1200);
     }
-  }, [setLocation, maxFiles]);
+  }, [setLocation, maxFiles, session]);
 
   const { getRootProps, getInputProps, isDragActive, isDragReject } = useDropzone({
     onDrop,

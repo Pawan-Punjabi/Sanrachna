@@ -1,0 +1,46 @@
+I want to integrate Supabase as my database. Here is my 
+Supabase project URL: https://betswpvmpxeffkwqndog.supabase.co
+and my 
+Supabase anon/public API key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJldHN3cHZtcHhlZmZrd3FuZG9nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MzY1ODcsImV4cCI6MjA4OTAxMjU4N30.mcYT-_pm5-TJJZq3XGm058DLusY4EVzrTzLK2qHIuZo
+
+Please do the following:
+1. Install dependencies
+Install the supabase-js client library (or @supabase/supabase-js for Node/JS projects). If this is a Python project, install supabase via pip instead.
+2. Create a Supabase client config file
+Create a dedicated file (e.g. supabaseClient.js or supabase_client.py) that initializes the Supabase client using the URL and key above. Export this client so it can be imported anywhere in the project.
+3. Store credentials securely in Replit Secrets
+Do NOT hardcode the URL or API key in any file. Instead:
+
+Add SUPABASE_URL and SUPABASE_ANON_KEY as Replit Secrets (environment variables)
+Read them via process.env.SUPABASE_URL (JS) or os.environ.get("SUPABASE_URL") (Python)
+
+4. Create the following database tables in Supabase
+Write a SQL migration file or run these via the Supabase dashboard:
+
+users — id, email, plan (free/pro), created_at
+floor_plans — id, user_id (FK → users), image_url, uploaded_at
+detections — id, floor_plan_id (FK → floor_plans), furniture_label, bounding_box (JSON), confidence_score
+product_suggestions — id, detection_id (FK → detections), store_name, product_name, price, rating, product_url, product_image_url, created_at
+
+5. Enable Row Level Security (RLS)
+Enable RLS on all tables. Add a policy so users can only read and write their own data (based on user_id matching auth.uid()).
+6. Wire up authentication
+Use Supabase Auth for user login/signup. Implement:
+
+Email + password signup and login
+Session persistence (store session in localStorage or cookies)
+A getCurrentUser() helper function that returns the logged-in user
+
+7. Create helper functions for core operations
+Write reusable functions for:
+
+saveFloorPlan(userId, imageUrl) — inserts into floor_plans
+saveDetections(floorPlanId, detections[]) — bulk inserts into detections
+saveProductSuggestions(detectionId, products[]) — inserts into product_suggestions
+getUserHistory(userId) — fetches all floor plans with their detections for a user
+
+8. Connect the plan/tier system
+When a user signs up, insert a row in users with plan = 'free' by default. Add a helper upgradeToPro(userId) that updates the plan to 'pro'. Gate features in the frontend by checking user.plan.
+9. Test the connection
+After setup, run a quick test: insert a dummy row into floor_plans and fetch it back. Log the result to confirm the database connection is working.
+10. Show me the final folder structure after all files are created so I can verify everything is in the right place.

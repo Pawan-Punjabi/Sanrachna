@@ -37,3 +37,11 @@ author = "agent"
 task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
+
+[userenv]
+
+[userenv.shared]
+SUPABASE_URL = "https://betswpvmpxeffkwqndog.supabase.co"
+SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJldHN3cHZtcHhlZmZrd3FuZG9nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MzY1ODcsImV4cCI6MjA4OTAxMjU4N30.mcYT-_pm5-TJJZq3XGm058DLusY4EVzrTzLK2qHIuZo"
+VITE_SUPABASE_URL = "https://betswpvmpxeffkwqndog.supabase.co"
+VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJldHN3cHZtcHhlZmZrd3FuZG9nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MzY1ODcsImV4cCI6MjA4OTAxMjU4N30.mcYT-_pm5-TJJZq3XGm058DLusY4EVzrTzLK2qHIuZo"

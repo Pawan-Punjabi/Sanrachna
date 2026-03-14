@@ -1,13 +1,26 @@
-import { Link } from "wouter";
-import { Moon, Sun, Zap } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { Moon, Sun, Zap, LogIn, LogOut, User } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
 import { motion } from "framer-motion";
 import sanrachnaLogo from "@assets/unnamed_(1)_1773208910201.png";
 import { usePlan } from "@/context/plan-context";
+import { useAuth } from "@/context/auth-context";
+import { signOut } from "@/lib/supabase-helpers";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { theme, toggleTheme } = useTheme();
   const { plan, isPro, togglePlan } = usePlan();
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      setLocation("/");
+    } catch (err) {
+      console.error("Sign out failed:", err);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col font-sans">
@@ -47,9 +60,45 @@ export function Layout({ children }: { children: React.ReactNode }) {
             >
               {isPro && <Zap size={11} className="fill-current shrink-0" />}
               <span>{isPro ? "Pro" : "Free"}</span>
-              {/* Pill slider */}
-              <span className="sr-only">Toggle plan</span>
             </button>
+
+            <div className="w-px h-6 bg-border" />
+
+            {/* Auth section */}
+            {!isLoading && (
+              isAuthenticated ? (
+                <div className="flex items-center gap-3">
+                  {/* User avatar / email */}
+                  <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
+                    <User size={14} className="text-accent" />
+                    <span className="max-w-[140px] truncate" data-testid="text-user-email">
+                      {user?.email}
+                    </span>
+                  </div>
+
+                  {/* Logout */}
+                  <button
+                    onClick={handleLogout}
+                    data-testid="button-logout"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-border hover:border-destructive/50 hover:text-destructive text-muted-foreground transition-colors duration-200"
+                    title="Sign out"
+                  >
+                    <LogOut size={12} />
+                    <span className="hidden sm:inline">Sign out</span>
+                  </button>
+                </div>
+              ) : (
+                <Link href="/auth">
+                  <button
+                    data-testid="button-login"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-accent text-accent-foreground hover:bg-accent/90 transition-colors duration-200"
+                  >
+                    <LogIn size={12} />
+                    <span>Sign in</span>
+                  </button>
+                </Link>
+              )
+            )}
 
             <div className="w-px h-6 bg-border" />
 

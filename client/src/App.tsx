@@ -5,16 +5,17 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
+import { AuthProvider } from "@/context/auth-context";
 import { PlanProvider } from "@/context/plan-context";
 
 import { Home } from "@/pages/Home";
 import { Analyzer } from "@/pages/Analyzer";
 import { Pricing } from "@/pages/Pricing";
+import { Auth } from "@/pages/Auth";
 
 function ScrollToTop() {
   const [location] = useLocation();
   useEffect(() => {
-    // Skip scroll-to-top when navigating to a hash anchor (e.g. /#how-it-works)
     if (window.location.hash) return;
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [location]);
@@ -35,6 +36,7 @@ function Router() {
           {(params) => <Analyzer id={parseInt(params.id, 10)} />}
         </Route>
         <Route path="/pricing" component={Pricing} />
+        <Route path="/auth" component={Auth} />
         <Route component={NotFound} />
       </Switch>
     </>
@@ -44,12 +46,14 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <PlanProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </PlanProvider>
+      <AuthProvider>
+        <PlanProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </PlanProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
