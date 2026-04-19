@@ -12,6 +12,31 @@ const sizeOf = (imageSize.default || imageSize) as any;
 import * as PDFDocumentModule from "pdfkit";
 const PDFDocument = (PDFDocumentModule.default || PDFDocumentModule) as any;
 
+// ─── Amazon Affiliate Configuration ──────────────────────────────────────────
+
+const AMAZON_AFFILIATE_TAG = "sanrachna-21";
+
+const KEYWORD_MAP: Record<string, string> = {
+  sofa: "modern sofa 3 seater",
+  bed: "queen size wooden bed",
+  table: "wooden dining table",
+  chair: "dining chair set",
+  sink: "kitchen sink stainless steel",
+  wardrobe: "wooden wardrobe storage",
+  door: "modern interior door",
+  toilet: "ceramic toilet commode",
+  kitchen_platform: "modular kitchen countertop",
+  king_bed: "king size storage bed",
+  single_bed: "single metal bed frame",
+  dining_table: "wooden dining table 4 seater",
+  study_table: "ergonomic study desk"
+};
+
+function generateAmazonLink(query: string): string {
+  return `https://www.amazon.in/s?k=${encodeURIComponent(query)}&tag=${AMAZON_AFFILIATE_TAG}`;
+}
+
+
 // Ensure uploads directory exists
 const uploadsDir = path.join(process.cwd(), "uploads");
 if (!fs.existsSync(uploadsDir)) {
@@ -205,8 +230,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
           confidence_score: d.confidence || 0,
         }, token);
 
-        // 3. Mock Product Suggestions (based on sanitized label)
-        const products = getMockProducts(label.toLowerCase());
+        // 3. Amazon Affiliate Product Suggestions
+        const products = getAmazonAffiliateProducts(label.toLowerCase());
         for (const p of products) {
           await storage.createProductSuggestion({ detection_id: detectionId, ...p }, token);
         }
@@ -348,6 +373,20 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
+  // ── GET /api/amazon-products ─────────────────────────────────────────────
+  app.get("/api/amazon-products", async (req, res) => {
+    try {
+      const query = req.query.query as string;
+      if (!query) return res.status(400).json({ message: "Query parameter is required" });
+
+      const products = getAmazonAffiliateProducts(query);
+      res.json({ products });
+    } catch (err: any) {
+      console.error("Amazon products error:", err);
+      res.status(500).json({ message: "Failed to fetch Amazon products" });
+    }
+  });
+
   return httpServer;
 }
 
@@ -380,7 +419,63 @@ function normalisePlan(plan: any) {
   };
 }
 
-// ── Mock product generator ────────────────────────────────────────────────────
+// ── Amazon Affiliate Product Generator ───────────────────────────────────────
+
+function getAmazonAffiliateProducts(label: string) {
+  const searchQuery = KEYWORD_MAP[label] || label;
+  const link = generateAmazonLink(searchQuery);
+  
+  const images: Record<string, string[]> = {
+    "bed": [
+      "https://images.unsplash.com/photo-1505693314120-0d443867891c?w=500&q=80",
+      "https://images.unsplash.com/photo-1540518614846-7eded433c457?w=500&q=80"
+    ],
+    "sofa": [
+      "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=500&q=80",
+      "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&q=80"
+    ],
+    "dining table": [
+      "https://images.unsplash.com/photo-1533090481728-8bbf9425e01c?w=500&q=80"
+    ],
+  };
+
+  const getImg = (idx: number) => {
+     const pool = images[label] || ["https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=500&q=80"];
+     return pool[idx % pool.length];
+  };
+
+  const cap = label.charAt(0).toUpperCase() + label.slice(1).replace(/_/g, " ");
+
+  // We generate 3 variations of products for the given label
+  return [
+    { 
+      store_name: "Amazon", 
+      product_name: `Premium ${cap} - Selected for your layout`, 
+      price: "₹24,999", 
+      rating: 4.5, 
+      product_url: link, 
+      product_image_url: getImg(0) 
+    },
+    { 
+      store_name: "Amazon", 
+      product_name: `Modern Style ${cap}`, 
+      price: "₹18,500", 
+      rating: 4.2, 
+      product_url: link, 
+      product_image_url: getImg(1) 
+    },
+    { 
+      store_name: "Amazon", 
+      product_name: `Compact ${cap} for small spaces`, 
+      price: "₹12,400", 
+      rating: 4.0, 
+      product_url: link, 
+      product_image_url: getImg(2) 
+    }
+  ];
+}
+
+// ── Legacy Mock product generator (kept for compatibility) ───────────────────
 
 function getMockProducts(label: string) {
   const images: Record<string, string> = {

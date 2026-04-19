@@ -45,6 +45,15 @@ export function ProductCard({ product }: ProductCardProps) {
         
         <div className="mt-auto pt-4 flex items-center justify-between border-t border-border/50">
           <span className="font-semibold text-lg">{product.price}</span>
+          <a 
+            href={product.productLink} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm"
+          >
+            {product.storeName === "Amazon" ? "View on Amazon" : "View Product"}
+            <ExternalLink size={14} />
+          </a>
         </div>
       </div>
     </div>
