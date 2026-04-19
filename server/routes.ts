@@ -7,8 +7,10 @@ import { api } from "@shared/routes";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import sizeOf from "image-size";
-import PDFDocument from "pdfkit";
+import * as imageSize from "image-size";
+const sizeOf = (imageSize.default || imageSize) as any;
+import * as PDFDocumentModule from "pdfkit";
+const PDFDocument = (PDFDocumentModule.default || PDFDocumentModule) as any;
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(process.cwd(), "uploads");
