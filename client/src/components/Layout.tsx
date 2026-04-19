@@ -1,15 +1,13 @@
 import { Link, useLocation } from "wouter";
-import { Moon, Sun, Zap, LogIn, LogOut, User } from "lucide-react";
+import { Moon, Sun, LogIn, LogOut, User } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
 import { motion } from "framer-motion";
 import sanrachnaLogo from "@assets/unnamed_(1)_1773208910201.png";
-import { usePlan } from "@/context/plan-context";
 import { useAuth } from "@/context/auth-context";
 import { signOut } from "@/lib/supabase-helpers";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { theme, toggleTheme } = useTheme();
-  const { plan, isPro, togglePlan } = usePlan();
   const { user, isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
 
@@ -38,31 +36,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
               <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors duration-200">Home</Link>
               <Link href="/analyzer" className="text-muted-foreground hover:text-foreground transition-colors duration-200">Analyzer</Link>
-              <a href="/#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors duration-200">How it works</a>
               <Link href="/pricing" className="text-muted-foreground hover:text-foreground transition-colors duration-200">Pricing</Link>
             </nav>
 
             <div className="w-px h-6 bg-border hidden md:block" />
-
-            {/* Free / Pro toggle */}
-            <button
-              onClick={togglePlan}
-              data-testid="button-plan-toggle"
-              className={`
-                relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider
-                border transition-all duration-300
-                ${isPro
-                  ? "bg-accent text-accent-foreground border-accent shadow-md shadow-accent/20"
-                  : "bg-muted text-muted-foreground border-border hover:border-accent/40"
-                }
-              `}
-              title={isPro ? "Switch to Free plan" : "Switch to Pro plan"}
-            >
-              {isPro && <Zap size={11} className="fill-current shrink-0" />}
-              <span>{isPro ? "Pro" : "Free"}</span>
-            </button>
-
-            <div className="w-px h-6 bg-border" />
 
             {/* Auth section */}
             {!isLoading && (

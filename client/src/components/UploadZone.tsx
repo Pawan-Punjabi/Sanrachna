@@ -1,9 +1,8 @@
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { UploadCloud, Image as ImageIcon, CheckCircle2, AlertCircle, Scan, Zap } from "lucide-react";
+import { UploadCloud, Image as ImageIcon, CheckCircle2, AlertCircle, Scan } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
-import { usePlan } from "@/context/plan-context";
 import { useAuth } from "@/context/auth-context";
 import { api } from "@shared/routes";
 import type { UploadResponse } from "@shared/schema";
@@ -35,10 +34,9 @@ export function UploadZone() {
   const [state, setState] = useState<UploadState>("idle");
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
-  const { isPro } = usePlan();
   const { session } = useAuth();
 
-  const maxFiles = isPro ? 10 : 1;
+  const maxFiles = 1;
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (!acceptedFiles.length) {
@@ -71,7 +69,7 @@ export function UploadZone() {
     setState("success");
     if (firstId !== null) {
       setTimeout(() => {
-        setLocation(`/analyzer/${firstId}`);
+        setLocation(`/result/${firstId}`);
       }, 1200);
     }
   }, [setLocation, maxFiles, session]);
@@ -84,7 +82,7 @@ export function UploadZone() {
       "image/webp": [".webp"],
     },
     maxFiles,
-    multiple: isPro,
+    multiple: false,
     disabled: state === "scanning" || state === "success",
   });
 
@@ -94,15 +92,6 @@ export function UploadZone() {
 
   return (
     <div className="w-full">
-      {isPro && (
-        <div className="flex items-center gap-1.5 mb-3">
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-accent/10 text-accent text-xs font-bold uppercase tracking-wider border border-accent/20">
-            <Zap size={10} className="fill-current" />
-            Pro — up to {maxFiles} images per upload
-          </span>
-        </div>
-      )}
-
       <div
         {...getRootProps()}
         data-testid="upload-zone"
@@ -177,18 +166,14 @@ export function UploadZone() {
                 )}
               </div>
               <h3 className="text-xl font-display font-medium mb-2">
-                {isDragActive
-                  ? isPro ? `Drop up to ${maxFiles} plans here` : "Drop floor plan here"
-                  : "Upload your floor plan"}
+                {isDragActive ? "Drop floor plan here" : "Upload your floor plan"}
               </h3>
               <p className="text-muted-foreground max-w-xs mb-6 text-sm leading-relaxed">
-                {isPro
-                  ? `Select up to ${maxFiles} JPG/PNG images. All will be analyzed with Pro insights.`
-                  : "Drag and drop a JPG or PNG of your space, or click to browse."}
+                Drag and drop a JPG or PNG of your space, or click to browse.
               </p>
 
               <div className="px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-medium text-sm shadow-md group-hover:shadow-lg group-hover:-translate-y-0.5 transition-all duration-300">
-                {isPro ? `Select Files (up to ${maxFiles})` : "Select File"}
+                Select File
               </div>
             </motion.div>
           )}

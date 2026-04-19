@@ -9,6 +9,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
 import { buildUrl, api } from "@shared/routes";
 
+import { NormalisedDetection, NormalisedFloorPlan } from "@shared/schema";
+
 interface AnalyzerProps {
   id?: number;
 }
@@ -16,9 +18,46 @@ interface AnalyzerProps {
 export function Analyzer({ id }: AnalyzerProps) {
   const [, setLocation] = useLocation();
   const { data: plan, isLoading, error } = useFloorPlan(id ?? 0);
-  const [activeDetectionId, setActiveDetectionId] = useState<number | null>(null);
+  const [activeLabel, setActiveLabel] = useState<string | null>(null);
   const idRef = useRef(id);
   idRef.current = id;
+
+  // Helper to generate a unique, light color based on the furniture label
+  const getFurnitureColor = (label: string) => {
+    const furnitureColors: Record<string, string> = {
+      "bed": "#D1FAE5",          // light emerald
+      "king-bed": "#D1FAE5",     // light emerald
+      "single-bed": "#ECFDF5",   // light emerald variant
+      "sofa": "#FEF3C7",         // light amber
+      "dining_table": "#DBEAFE", // light blue
+      "table": "#DBEAFE",        // light blue
+      "study_table": "#E0E7FF",  // light indigo
+      "door": "#FEE2E2",         // light red/rose
+      "sink": "#E0F2FE",         // light sky
+      "toilet": "#F1F5F9",       // light slate
+      "kitchen_platform": "#F3E8FF" // light purple
+    };
+
+    const sanitized = label.toLowerCase().replace(/_/g, " ");
+    if (furnitureColors[sanitized]) return furnitureColors[sanitized];
+    
+    // Hash-based unique light color generation (no black/white)
+    let hash = 0;
+    for (let i = 0; i < label.length; i++) {
+      hash = label.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const h = Math.abs(hash) % 360;
+    return `hsl(${h}, 80%, 80%)`; 
+  };
+
+  // Group detections by label for the sidebar summary
+  const detectionCategories = (plan?.detections || []).reduce((acc: Record<string, {label: string, count: number}>, d) => {
+    if (!acc[d.label]) acc[d.label] = { label: d.label, count: 0 };
+    acc[d.label].count++;
+    return acc;
+  }, {});
+
+  const categories = Object.values(detectionCategories).sort((a, b) => b.count - a.count);
 
   // Delete floor plan and its image file when the user navigates away
   useEffect(() => {
@@ -131,9 +170,9 @@ export function Analyzer({ id }: AnalyzerProps) {
     );
   }
 
-  // Flatten products across detections
-  const activeProducts = activeDetectionId
-    ? plan.detections.find(d => d.id === activeDetectionId)?.products || []
+  // Flatten products across detections matching the active category
+  const activeProducts = activeLabel
+    ? plan.detections.filter(d => d.label === activeLabel).flatMap(d => d.products)
     : plan.detections.flatMap(d => d.products);
 
   return (
@@ -175,39 +214,46 @@ export function Analyzer({ id }: AnalyzerProps) {
         {/* Main analysis grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 xl:gap-16 items-start">
           {/* Floor Plan Viewer */}
-          <div className="lg:col-span-7 xl:col-span-8 sticky top-28">
-            <div className="relative rounded-2xl overflow-hidden bg-muted border border-border shadow-lg">
+          <div className="lg:col-span-6 xl:col-span-7 sticky top-28">
+            <div className="relative rounded-2xl overflow-hidden bg-secondary border border-border w-fit mx-auto">
               <img
                 src={plan.imageUrl}
                 alt="Floor plan"
-                className="w-full h-auto block select-none"
+                className="w-auto max-h-[65vh] block select-none"
                 draggable={false}
               />
               <AnimatePresence>
                 {plan.detections.map(detection => {
-                  const isActive = activeDetectionId === detection.id;
-                  const isFaded = activeDetectionId !== null && !isActive;
+                  const isActive = activeLabel === detection.label;
+                  const isFaded = activeLabel !== null && !isActive;
+                  const catColor = getFurnitureColor(detection.label);
+
                   return (
                     <motion.div
                       key={detection.id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: isFaded ? 0.2 : 1 }}
                       className={clsx(
-                        "absolute rounded-md border-2 cursor-pointer transition-all duration-300",
-                        isActive
-                          ? "border-accent bg-accent/20 z-20"
-                          : "border-primary/50 bg-primary/10 hover:bg-primary/20 z-10"
+                        "absolute rounded-sm border-2 cursor-pointer transition-all duration-300 shadow-sm",
+                        isActive ? "z-20 scale-[1.02]" : "z-10"
                       )}
                       style={{
                         left: `${detection.boxX * 100}%`,
                         top: `${detection.boxY * 100}%`,
                         width: `${detection.boxW * 100}%`,
                         height: `${detection.boxH * 100}%`,
+                        borderColor: catColor,
+                        backgroundColor: `${catColor}33`, // 20% opacity for better visibility
+                        borderStyle: isActive ? "solid" : "dashed"
                       }}
-                      onClick={() => setActiveDetectionId(isActive ? null : detection.id)}
+                      onClick={() => setActiveLabel(isActive ? null : detection.label)}
                     >
                       {isActive && (
-                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-foreground text-background text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full whitespace-nowrap pointer-events-none shadow-lg">
+                        <div 
+                          className="absolute -top-7 left-0 bg-white border border-border text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded shadow-sm flex items-center gap-1.5 whitespace-nowrap pointer-events-none"
+                          style={{ color: "black" }} // Black text on white label for contrast
+                        >
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: catColor }} />
                           {detection.label}
                         </div>
                       )}
@@ -222,45 +268,58 @@ export function Analyzer({ id }: AnalyzerProps) {
           </div>
 
           {/* Detected Zones Panel */}
-          <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-6">
+          {/* Detected Layout Summary Sidebar */}
+          <div className="lg:col-span-6 xl:col-span-5 flex flex-col gap-6">
             <div className="bg-card rounded-2xl p-6 md:p-8 border border-border">
-              <h3 className="font-display text-xl font-bold mb-5">Detected Zones</h3>
-              <div className="space-y-2">
-                {plan.detections.length === 0 ? (
-                  <p className="text-muted-foreground italic text-sm">No zones identified.</p>
+              <h3 className="font-display text-xl font-bold mb-5 italic">Detected Layout</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-2.5">
+                {categories.length === 0 ? (
+                  <p className="text-muted-foreground italic text-sm">No furniture identified.</p>
                 ) : (
-                  plan.detections.map(detection => {
-                    const isActive = activeDetectionId === detection.id;
+                  categories.map(({ label, count }) => {
+                    const isActive = activeLabel === label;
+                    const catColor = getFurnitureColor(label);
                     return (
                       <button
-                        key={detection.id}
-                        onClick={() => setActiveDetectionId(isActive ? null : detection.id)}
+                        key={label}
+                        onClick={() => setActiveLabel(isActive ? null : label)}
                         className={clsx(
-                          "w-full text-left flex items-center justify-between p-4 rounded-xl border transition-all duration-200",
+                          "w-full text-left flex items-center justify-between p-2.5 rounded-xl border transition-all duration-200 group",
                           isActive
-                            ? "bg-accent/10 border-accent/50"
-                            : "bg-background border-border hover:border-primary/30"
+                            ? "border-foreground/20 shadow-sm"
+                            : "bg-background border-border hover:border-foreground/10 hover:shadow-sm"
                         )}
+                        style={isActive ? { backgroundColor: catColor } : {}}
                       >
                         <div className="flex items-center gap-3">
-                          <div className={clsx(
-                            "w-2.5 h-2.5 rounded-full",
-                            isActive ? "bg-accent" : "bg-primary/40"
-                          )} />
-                          <span className="font-medium capitalize text-sm">{detection.label}</span>
+                          <div 
+                            className="w-4 h-4 rounded-md border border-foreground/10 shadow-sm" 
+                            style={{ backgroundColor: catColor }} 
+                          />
+                          <span className={clsx(
+                            "font-semibold capitalize text-sm",
+                            isActive ? "text-black" : "text-foreground/80"
+                          )}>
+                            {label.replace(/_/g, " ")}
+                          </span>
                         </div>
-                        <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-md">
-                          {Math.round(detection.confidence * 100)}% match
+                        <span className={clsx(
+                          "text-xs font-bold px-2.5 py-1 rounded-full border",
+                          isActive 
+                            ? "bg-white/80 border-foreground/10 text-black shadow-sm" 
+                            : "bg-muted border-border text-muted-foreground group-hover:bg-background"
+                        )}>
+                          {count}
                         </span>
                       </button>
                     );
                   })
                 )}
               </div>
-              {activeDetectionId && (
+              {activeLabel && (
                 <button
-                  onClick={() => setActiveDetectionId(null)}
-                  className="w-full mt-5 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors border border-border rounded-lg"
+                  onClick={() => setActiveLabel(null)}
+                  className="w-full mt-6 py-2.5 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all border border-border border-dashed rounded-lg bg-background hover:bg-muted"
                 >
                   Clear Selection
                 </button>
@@ -275,8 +334,8 @@ export function Analyzer({ id }: AnalyzerProps) {
             <div>
               <h2 className="text-3xl font-display font-bold mb-2">Product Recommendations</h2>
               <p className="text-muted-foreground">
-                {activeDetectionId
-                  ? `Curated picks for the selected ${plan.detections.find(d => d.id === activeDetectionId)?.label} zone.`
+                {activeLabel
+                  ? `Curated furniture picks suited for your ${activeLabel.replace(/_/g, " ")} detections.`
                   : "Curated furniture picks suited for your space."}
               </p>
             </div>

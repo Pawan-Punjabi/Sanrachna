@@ -5,6 +5,7 @@ import { z } from "zod";
 export interface User {
   id: string;
   email: string;
+  first_name?: string | null;
   plan: "free" | "pro";
   created_at: string;
 }

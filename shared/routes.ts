@@ -48,6 +48,13 @@ export const api = {
         404: errorSchemas.notFound,
       },
     },
+    report: {
+      method: 'POST' as const,
+      path: '/api/generate-report' as const,
+      responses: {
+        200: z.custom<Blob>(),
+      },
+    },
   },
 };
 

@@ -10,8 +10,10 @@ type Mode = "login" | "signup";
 export function Auth() {
   const [, setLocation] = useLocation();
   const [mode, setMode] = useState<Mode>("login");
+  const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +27,12 @@ export function Auth() {
 
     try {
       if (mode === "signup") {
-        await signUp(email, password);
+        if (password !== confirmPassword) {
+          setError("Passwords do not match");
+          setLoading(false);
+          return;
+        }
+        await signUp(email, password, firstName);
         setSuccess("Account created! Check your email to confirm, then log in.");
         setMode("login");
       } else {
@@ -60,6 +67,24 @@ export function Auth() {
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-5">
+              {/* First Name (Signup Only) */}
+              {mode === "signup" && (
+                <div>
+                  <label className="block text-sm font-medium mb-1.5" htmlFor="firstName">
+                    First Name
+                  </label>
+                  <input
+                    id="firstName"
+                    type="text"
+                    required
+                    value={firstName}
+                    onChange={e => setFirstName(e.target.value)}
+                    placeholder="Jane"
+                    className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/40 transition"
+                  />
+                </div>
+              )}
+
               {/* Email */}
               <div>
                 <label className="block text-sm font-medium mb-1.5" htmlFor="email">
@@ -103,6 +128,34 @@ export function Auth() {
                   </button>
                 </div>
               </div>
+
+              {/* Confirm Password (Signup Only) */}
+              {mode === "signup" && (
+                <div>
+                  <label className="block text-sm font-medium mb-1.5" htmlFor="confirmPassword">
+                    Confirm Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="confirmPassword"
+                      type={showPass ? "text" : "password"}
+                      required
+                      minLength={6}
+                      value={confirmPassword}
+                      onChange={e => setConfirmPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full px-4 py-2.5 pr-10 rounded-lg border border-border bg-background text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/40 transition"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPass(s => !s)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Error / Success */}
               {error && (

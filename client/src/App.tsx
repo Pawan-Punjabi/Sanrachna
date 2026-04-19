@@ -10,6 +10,7 @@ import { PlanProvider } from "@/context/plan-context";
 
 import { Home } from "@/pages/Home";
 import { Analyzer } from "@/pages/Analyzer";
+import { Result } from "@/pages/Result";
 import { Pricing } from "@/pages/Pricing";
 import { Auth } from "@/pages/Auth";
 
@@ -31,6 +32,9 @@ function Router() {
         <Route path="/analyzer" component={() => <Analyzer />} />
         <Route path="/analyzer/:id">
           {(params) => <Analyzer id={parseInt(params.id, 10)} />}
+        </Route>
+        <Route path="/result/:id">
+          {(params) => <Result id={parseInt(params.id, 10)} />}
         </Route>
         <Route path="/floor-plan/:id">
           {(params) => <Analyzer id={parseInt(params.id, 10)} />}

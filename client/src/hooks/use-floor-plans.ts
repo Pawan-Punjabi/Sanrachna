@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, buildUrl } from "@shared/routes";
-import type { FloorPlanWithDetails, UploadResponse } from "@shared/schema";
+import type { NormalisedFloorPlan, UploadResponse } from "@shared/schema";
 
 export function useFloorPlans() {
   return useQuery({
@@ -10,7 +10,7 @@ export function useFloorPlans() {
       if (!res.ok) throw new Error("Failed to fetch floor plans");
       // Coerce the response structure
       const data = await res.json();
-      return data as FloorPlanWithDetails[];
+      return data as NormalisedFloorPlan[];
     },
   });
 }
@@ -24,7 +24,7 @@ export function useFloorPlan(id: number) {
       if (res.status === 404) return null;
       if (!res.ok) throw new Error("Failed to fetch floor plan details");
       const data = await res.json();
-      return data as FloorPlanWithDetails;
+      return data as NormalisedFloorPlan;
     },
     enabled: !!id,
   });

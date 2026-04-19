@@ -9,8 +9,16 @@ export async function getCurrentUser() {
 }
 
 /** Email + password signup. Auto-inserts a users profile row (via DB trigger). */
-export async function signUp(email: string, password: string) {
-  const { data, error } = await supabase.auth.signUp({ email, password });
+export async function signUp(email: string, password: string, firstName?: string) {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        first_name: firstName,
+      },
+    },
+  });
   if (error) throw error;
   return data;
 }
