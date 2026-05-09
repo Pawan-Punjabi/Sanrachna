@@ -6,7 +6,7 @@ import sanrachnaLogo from "@assets/unnamed_(1)_1773208910201.png";
 import { useAuth } from "@/context/auth-context";
 import { signOut } from "@/lib/supabase-helpers";
 
-export function Layout({ children }: { children: React.ReactNode }) {
+export function Layout({ children, hideFooter }: { children: React.ReactNode; hideFooter?: boolean }) {
   const { theme, toggleTheme } = useTheme();
   const { user, isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
@@ -21,7 +21,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans">
+    <div className={hideFooter ? "h-screen flex flex-col font-sans overflow-hidden" : "min-h-screen flex flex-col font-sans"}>
       <header className="sticky top-0 z-50 glass backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-28 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
@@ -36,6 +36,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
               <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors duration-200">Home</Link>
               <Link href="/analyzer" className="text-muted-foreground hover:text-foreground transition-colors duration-200">Analyzer</Link>
+              <Link href="/generate-3d-floorplan" className="text-muted-foreground hover:text-foreground transition-colors duration-200">3D Generator</Link>
               <Link href="/pricing" className="text-muted-foreground hover:text-foreground transition-colors duration-200">Pricing</Link>
             </nav>
 
@@ -103,17 +104,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {children}
       </main>
 
-      <footer className="border-t border-border/50 py-10 mt-0 bg-card/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <span className="font-display font-bold">Sanrachna</span>
-            <span className="text-sm">© {new Date().getFullYear()}</span>
+      {!hideFooter && (
+        <footer className="border-t border-border/50 py-10 mt-0 bg-card/50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <span className="font-display font-bold">Sanrachna</span>
+              <span className="text-sm">© {new Date().getFullYear()}</span>
+            </div>
+            <p className="text-sm text-muted-foreground text-balance text-center">
+              Creating beautiful spaces through thoughtful design.
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground text-balance text-center">
-            Creating beautiful spaces through thoughtful design.
-          </p>
-        </div>
-      </footer>
+        </footer>
+      )}
     </div>
   );
 }

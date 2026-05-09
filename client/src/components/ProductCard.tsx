@@ -1,61 +1,70 @@
 import { ExternalLink, Star } from "lucide-react";
-import type { SuggestedProduct } from "@shared/schema";
+import type { NormalisedProduct } from "@shared/schema";
 
 interface ProductCardProps {
-  product: SuggestedProduct;
+  product: NormalisedProduct;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
   return (
-    <div className="group flex flex-col bg-card rounded-2xl overflow-hidden border border-border/50 hover:shadow-xl hover:shadow-primary/5 hover:border-border transition-all duration-500 ease-out h-full">
-      <div className="relative aspect-[4/3] overflow-hidden bg-secondary/50">
-        <img 
-          src={product.imageUrl} 
-          alt={product.name}
-          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out mix-blend-multiply dark:mix-blend-normal"
-          loading="lazy"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <a 
-          href={product.productLink} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white/90 text-black flex items-center justify-center shadow-lg translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 hover:bg-accent hover:text-white"
-        >
-          <ExternalLink size={18} />
-        </a>
-      </div>
-      
-      <div className="p-5 flex flex-col flex-1">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            {product.storeName}
-          </span>
-          {product.rating && (
-            <div className="flex items-center gap-1 text-accent">
-              <Star size={12} className="fill-current" />
-              <span className="text-xs font-semibold">{product.rating}</span>
+    <a 
+      href={product.productLink} 
+      target="_blank" 
+      rel="noopener noreferrer"
+      className="group block h-full"
+    >
+      <div className="flex flex-col bg-card rounded-2xl overflow-hidden border border-border/50 hover:shadow-2xl hover:shadow-primary/10 hover:border-primary/20 transition-all duration-500 ease-out h-full relative">
+        {/* Image Container */}
+        <div className="relative aspect-[4/5] overflow-hidden bg-muted/30">
+          <img 
+            src={product.imageUrl} 
+            alt={product.name}
+            className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700 ease-out"
+            loading="lazy"
+            onError={(e) => {
+              const img = e.currentTarget;
+              img.onerror = null;
+              img.src = "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&q=80";
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          
+          <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/90 bg-white/10 backdrop-blur-md px-2 py-1 rounded">
+               {product.storeName}
+             </span>
+             <div className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center shadow-lg">
+                <ExternalLink size={14} />
+             </div>
+          </div>
+        </div>
+        
+        {/* Content */}
+        <div className="p-5 flex flex-col flex-1">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-accent/10 rounded-full">
+              <Star size={10} className="fill-accent text-accent" />
+              <span className="text-[11px] font-bold text-accent">{product.rating || "4.2"}</span>
             </div>
-          )}
-        </div>
-        
-        <h4 className="font-display font-medium text-lg leading-tight mb-2 group-hover:text-accent transition-colors line-clamp-2">
-          {product.name}
-        </h4>
-        
-        <div className="mt-auto pt-4 flex items-center justify-between border-t border-border/50">
-          <span className="font-semibold text-lg">{product.price}</span>
-          <a 
-            href={product.productLink} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm"
-          >
-            {product.storeName === "Amazon" ? "View on Amazon" : "View Product"}
-            <ExternalLink size={14} />
-          </a>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+              Furniture
+            </span>
+          </div>
+          
+          <h4 className="font-display font-semibold text-base leading-tight mb-3 group-hover:text-primary transition-colors line-clamp-2">
+            {product.name}
+          </h4>
+          
+          <div className="mt-auto flex items-center justify-between pt-4 border-t border-border/40">
+            <span className="font-display font-bold text-xl text-foreground">
+              {product.price}
+            </span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+              View Details
+            </span>
+          </div>
         </div>
       </div>
-    </div>
+    </a>
   );
 }

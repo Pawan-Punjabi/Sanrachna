@@ -55,6 +55,20 @@ export const api = {
         200: z.custom<Blob>(),
       },
     },
+    scrape: {
+      method: 'GET' as const,
+      path: '/api/scrape-products' as const,
+      responses: {
+        200: z.object({
+          products: z.array(z.object({
+            title: z.string(),
+            image: z.string(),
+            price: z.string(),
+            link: z.string(),
+          })),
+        }),
+      },
+    },
   },
 };
 

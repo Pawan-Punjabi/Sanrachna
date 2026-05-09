@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Layout } from "@/components/Layout";
 import { useFloorPlan } from "@/hooks/use-floor-plans";
 import { ProductCard } from "@/components/ProductCard";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Maximize, Layers, Search, RefreshCw, Download, Loader2 } from "lucide-react";
+import { ArrowLeft, Maximize, Layers, Search, RefreshCw, Download, Loader2, ExternalLink } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
+import { ProductFilter, FilterState } from "@/components/ProductFilter";
 
 import { NormalisedDetection, NormalisedFloorPlan } from "@shared/schema";
 
@@ -20,24 +21,45 @@ export function Result({ id }: ResultProps) {
   const { toast } = useToast();
   const [activeLabel, setActiveLabel] = useState<string | null>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  
+  const [filters, setFilters] = useState<FilterState>({
+    priceRange: [0, 1000000],
+    sortBy: "relevance"
+  });
+
+  // Calculate overall min/max prices for the slider
+  const allProducts = (plan?.detections || []).flatMap(d => d.products);
+  const prices = allProducts.map(p => parseFloat(p.price.replace(/[^0-9.]/g, '') || "0")).filter(p => p > 0);
+  const globalMinPrice = prices.length ? Math.floor(Math.min(...prices)) : 0;
+  const globalMaxPrice = prices.length ? Math.ceil(Math.max(...prices)) : 100000;
+
+  // Initialize filter range when plan data is loaded
+  useEffect(() => {
+    if (plan && prices.length > 0) {
+      setFilters(f => ({
+        ...f,
+        priceRange: [globalMinPrice, globalMaxPrice]
+      }));
+    }
+  }, [plan, globalMinPrice, globalMaxPrice]);
 
   // Helper to generate a unique, light color based on the furniture label
   const getFurnitureColor = (label: string) => {
     const furnitureColors: Record<string, string> = {
       "bed": "#D1FAE5",          // light emerald
-      "king-bed": "#D1FAE5",     // light emerald
-      "single-bed": "#ECFDF5",   // light emerald variant
+      "king bed": "#D1FAE5",     // light emerald
+      "single bed": "#ECFDF5",   // light emerald variant
       "sofa": "#FEF3C7",         // light amber
-      "dining_table": "#DBEAFE", // light blue
+      "dining table": "#DBEAFE", // light blue
       "table": "#DBEAFE",        // light blue
-      "study_table": "#E0E7FF",  // light indigo
+      "study table": "#E0E7FF",  // light indigo
       "door": "#FEE2E2",         // light red/rose
       "sink": "#E0F2FE",         // light sky
       "toilet": "#F1F5F9",       // light slate
-      "kitchen_platform": "#F3E8FF" // light purple
+      "kitchen platform": "#F3E8FF" // light purple
     };
 
-    const sanitized = label.toLowerCase().replace(/_/g, " ");
+    const sanitized = label.toLowerCase().replace(/[_-]/g, " ").trim();
     if (furnitureColors[sanitized]) return furnitureColors[sanitized];
     
     // Hash-based unique light color generation (no black/white)
@@ -50,7 +72,7 @@ export function Result({ id }: ResultProps) {
   };
 
   // Group detections by label for the sidebar summary
-  const detectionCategories = (plan?.detections || []).reduce((acc: Record<string, {label: string, count: number}>, d) => {
+  const detectionCategories = (plan?.detections || []).reduce<Record<string, {label: string, count: number}>>((acc, d) => {
     if (!acc[d.label]) acc[d.label] = { label: d.label, count: 0 };
     acc[d.label].count++;
     return acc;
@@ -94,17 +116,15 @@ export function Result({ id }: ResultProps) {
     );
   }
 
-  // Flatten all products across detections matching the active category
-  const activeProducts = activeLabel 
-    ? plan.detections.filter(d => d.label === activeLabel).flatMap(d => d.products)
-    : plan.detections.flatMap(d => d.products);
+  // Analysis loading and error states are handled above
+  const currentPlan = plan as NormalisedFloorPlan;
 
   const downloadReport = async () => {
-    if (!plan) return;
+    if (!currentPlan) return;
     setIsGeneratingPdf(true);
     
     // Construct payload
-    const costEstimation = plan.detections.map(d => ({
+    const costEstimation = currentPlan.detections.map(d => ({
        item: d.label.replace(/_/g, " "),
        qty: 1, 
        unit_price: d.products.length ? parseFloat(d.products[0].price.replace(/[^0-9.]/g, '') || "0") : 0
@@ -122,7 +142,7 @@ export function Result({ id }: ResultProps) {
     });
 
     const recommendations: Record<string, any[]> = {};
-    plan.detections.forEach(d => {
+    currentPlan.detections.forEach(d => {
        const label = d.label.replace(/_/g, " ");
        if (!recommendations[label]) {
            recommendations[label] = d.products.map(p => ({
@@ -134,8 +154,10 @@ export function Result({ id }: ResultProps) {
     });
 
     const reportData = {
-      annotated_image: plan.imageUrl,
+      floorPlanName: currentPlan.name,
+      annotated_image: currentPlan.imageUrl,
       detections: categories.map(c => ({ label: c.label, count: c.count })),
+      rawDetections: currentPlan.detections, // Send all detections for box drawing
       cost_estimation: Array.from(costMap.values()),
       recommendations,
       design_suggestions: [
@@ -144,7 +166,7 @@ export function Result({ id }: ResultProps) {
       ],
       budget_suggestions: [
         "Check standardized sizes for potential bulk savings.",
-        "Compare top-rated Wayfair alternatives against premium IKEA finds."
+        "Compare top-rated alternatives against available options for the best value."
       ]
     };
 
@@ -193,11 +215,11 @@ export function Result({ id }: ResultProps) {
         <div className="flex flex-col lg:flex-row items-baseline justify-between gap-4 mb-10">
           <div>
             <h1 className="text-4xl lg:text-5xl font-display font-medium tracking-tight mb-2">
-              {plan.name || "Analysis Result"}
+              {currentPlan.name || "Analysis Result"}
             </h1>
             <p className="text-muted-foreground flex items-center gap-2">
               <Layers size={16} />
-              Identified {plan.detections.length} key zones
+              Identified {currentPlan.detections.length} key zones
             </p>
           </div>
           <button
@@ -215,7 +237,7 @@ export function Result({ id }: ResultProps) {
           <div className="lg:col-span-6 xl:col-span-7 sticky top-28">
             <div className="relative rounded-3xl overflow-hidden bg-secondary shadow-2xl shadow-black/5 border border-border w-fit mx-auto">
               <img 
-                src={plan.imageUrl} 
+                src={currentPlan.imageUrl} 
                 alt="Floor plan" 
                 className="w-auto max-h-[65vh] block select-none"
                 draggable={false}
@@ -223,7 +245,7 @@ export function Result({ id }: ResultProps) {
               
               {/* Bounding Boxes */}
               <AnimatePresence>
-                {plan.detections.map(detection => {
+                {currentPlan.detections.map(detection => {
                   const isActive = activeLabel === detection.label;
                   const isFaded = activeLabel !== null && !isActive;
                   const catColor = getFurnitureColor(detection.label);
@@ -334,44 +356,98 @@ export function Result({ id }: ResultProps) {
           </div>
         </div>
 
-        {/* Recommendations Section */}
+        {/* Product Recommendations */}
         <div className="mt-24 mb-16 border-t border-border pt-16">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
             <div>
               <h2 className="text-3xl font-display font-medium mb-3">Curated Collection</h2>
-              <p className="text-muted-foreground text-lg">
+              <p className="text-muted-foreground text-lg max-w-2xl">
                 {activeLabel 
                   ? `Recommended pieces specifically for the selected ${activeLabel.replace(/_/g, " ").toLowerCase()} detections.`
-                  : "Pieces perfectly scaled and styled for your overall space."}
+                  : "Real-time furniture picks from Amazon, curated based on your floor plan analysis."}
               </p>
             </div>
-            <div className="text-sm font-medium px-4 py-2 bg-secondary rounded-full whitespace-nowrap">
-              {activeProducts.length} Items Found
-            </div>
+            
+            <ProductFilter 
+              minPrice={globalMinPrice} 
+              maxPrice={globalMaxPrice} 
+              onFilterChange={setFilters} 
+              currentFilters={filters}
+            />
           </div>
 
-          {activeProducts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 xl:gap-8">
-              <AnimatePresence mode="popLayout">
-                {activeProducts.map((product) => (
-                  <motion.div
-                    key={product.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.4 }}
-                  >
-                    <ProductCard product={product} />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          ) : (
-            <div className="text-center py-20 bg-card rounded-3xl border border-dashed border-border">
-              <p className="text-lg text-muted-foreground font-medium">No products found for this selection.</p>
-            </div>
-          )}
+          <div className="flex flex-col gap-16">
+            {categories
+              .filter(cat => !activeLabel || cat.label === activeLabel)
+              .map(({ label }) => {
+                let products = currentPlan.detections
+                  .filter(d => d.label === label)
+                  .flatMap(d => d.products)
+                  .filter((p, index, self) => 
+                     index === self.findIndex((t) => t.productLink === p.productLink)
+                  );
+
+                // Apply Price Filter
+                products = products.filter(p => {
+                  const pPrice = parseFloat(p.price.replace(/[^0-9.]/g, '') || "0");
+                  return pPrice >= filters.priceRange[0] && pPrice <= filters.priceRange[1];
+                });
+
+                // Apply Sorting
+                products = [...products].sort((a, b) => {
+                  const priceA = parseFloat(a.price.replace(/[^0-9.]/g, '') || "0");
+                  const priceB = parseFloat(b.price.replace(/[^0-9.]/g, '') || "0");
+                  
+                  if (filters.sortBy === "price-asc") return priceA - priceB;
+                  if (filters.sortBy === "price-desc") return priceB - priceA;
+                  if (filters.sortBy === "rating") return (b.rating || 0) - (a.rating || 0);
+                  return 0; // relevance (default order)
+                });
+
+                const catColor = getFurnitureColor(label);
+
+                return (
+                  <div key={label} className="space-y-6">
+                    <div className="flex items-center justify-between border-b border-border/50 pb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 rounded-lg shadow-sm flex items-center justify-center" style={{ backgroundColor: catColor }}>
+                           <div className="w-2 h-2 rounded-full bg-black/20" />
+                        </div>
+                        <h3 className="text-2xl font-display font-bold capitalize">
+                          {label.replace(/_/g, " ")} <span className="text-muted-foreground font-normal ml-2">Recommendations</span>
+                        </h3>
+                      </div>
+                      
+                    </div>
+
+                    {products.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                        <AnimatePresence mode="popLayout">
+                          {products.map((product, idx) => (
+                            <motion.div
+                              key={`${label}-${product.id || idx}`}
+                              layout
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.95 }}
+                              transition={{ duration: 0.4, delay: idx * 0.05 }}
+                            >
+                              <ProductCard product={product} />
+                            </motion.div>
+                          ))}
+                        </AnimatePresence>
+                      </div>
+                    ) : (
+                      <div className="py-10 text-center bg-muted/20 rounded-2xl border border-dashed border-border/50">
+                        <p className="text-muted-foreground flex flex-col items-center gap-2">
+                          <span>No specific products found for this section.</span>
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+          </div>
         </div>
       </div>
     </Layout>

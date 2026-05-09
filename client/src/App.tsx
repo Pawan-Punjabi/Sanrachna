@@ -13,6 +13,7 @@ import { Analyzer } from "@/pages/Analyzer";
 import { Result } from "@/pages/Result";
 import { Pricing } from "@/pages/Pricing";
 import { Auth } from "@/pages/Auth";
+import { Generate3DFloorplan } from "@/pages/Generate3DFloorplan";
 
 function ScrollToTop() {
   const [location] = useLocation();
@@ -41,6 +42,7 @@ function Router() {
         </Route>
         <Route path="/pricing" component={Pricing} />
         <Route path="/auth" component={Auth} />
+        <Route path="/generate-3d-floorplan" component={Generate3DFloorplan} />
         <Route component={NotFound} />
       </Switch>
     </>

@@ -4,12 +4,12 @@ import { Layout } from "@/components/Layout";
 import { UploadZone } from "@/components/UploadZone";
 import { useFloorPlan } from "@/hooks/use-floor-plans";
 import { ProductCard } from "@/components/ProductCard";
-import { ArrowLeft, Layers, Search, RefreshCw } from "lucide-react";
+import { ArrowLeft, Layers, Search, RefreshCw, Loader2, ExternalLink } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
 import { buildUrl, api } from "@shared/routes";
 
-import { NormalisedDetection, NormalisedFloorPlan } from "@shared/schema";
+import { NormalisedDetection, NormalisedFloorPlan, NormalisedProduct } from "@shared/schema";
 
 interface AnalyzerProps {
   id?: number;
@@ -51,7 +51,7 @@ export function Analyzer({ id }: AnalyzerProps) {
   };
 
   // Group detections by label for the sidebar summary
-  const detectionCategories = (plan?.detections || []).reduce((acc: Record<string, {label: string, count: number}>, d) => {
+  const detectionCategories = (plan?.detections || []).reduce<Record<string, {label: string, count: number}>>((acc, d) => {
     if (!acc[d.label]) acc[d.label] = { label: d.label, count: 0 };
     acc[d.label].count++;
     return acc;
@@ -170,10 +170,8 @@ export function Analyzer({ id }: AnalyzerProps) {
     );
   }
 
-  // Flatten products across detections matching the active category
-  const activeProducts = activeLabel
-    ? plan.detections.filter(d => d.label === activeLabel).flatMap(d => d.products)
-    : plan.detections.flatMap(d => d.products);
+  // Analysis loading and error states are handled above
+  const currentPlan = plan as NormalisedFloorPlan;
 
   return (
     <Layout>
@@ -188,18 +186,18 @@ export function Analyzer({ id }: AnalyzerProps) {
             Analyzer
           </button>
           <span>/</span>
-          <span className="text-foreground font-medium truncate max-w-[200px]">{plan.name}</span>
+          <span className="text-foreground font-medium truncate max-w-[200px]">{currentPlan.name}</span>
         </div>
 
         {/* Page header */}
         <div className="flex flex-col lg:flex-row items-baseline justify-between gap-4 mb-10">
           <div>
             <h1 className="text-4xl lg:text-5xl font-display font-bold tracking-tight mb-2">
-              {plan.name || "Analysis Result"}
+              {currentPlan.name || "Analysis Result"}
             </h1>
             <p className="text-muted-foreground flex items-center gap-2 text-base">
               <Layers size={16} />
-              {plan.detections.length} furniture zone{plan.detections.length !== 1 ? "s" : ""} identified
+              {currentPlan.detections.length} furniture zone{currentPlan.detections.length !== 1 ? "s" : ""} identified
             </p>
           </div>
           <button
@@ -217,13 +215,13 @@ export function Analyzer({ id }: AnalyzerProps) {
           <div className="lg:col-span-6 xl:col-span-7 sticky top-28">
             <div className="relative rounded-2xl overflow-hidden bg-secondary border border-border w-fit mx-auto">
               <img
-                src={plan.imageUrl}
-                alt="Floor plan"
+                src={currentPlan.imageUrl}
+                alt="Floor currentPlan"
                 className="w-auto max-h-[65vh] block select-none"
                 draggable={false}
               />
               <AnimatePresence>
-                {plan.detections.map(detection => {
+                {currentPlan.detections.map(detection => {
                   const isActive = activeLabel === detection.label;
                   const isFaded = activeLabel !== null && !isActive;
                   const catColor = getFurnitureColor(detection.label);
@@ -330,42 +328,70 @@ export function Analyzer({ id }: AnalyzerProps) {
 
         {/* Product Recommendations */}
         <div className="mt-20 mb-16 border-t border-border pt-14">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
-            <div>
-              <h2 className="text-3xl font-display font-bold mb-2">Product Recommendations</h2>
-              <p className="text-muted-foreground">
-                {activeLabel
-                  ? `Curated furniture picks suited for your ${activeLabel.replace(/_/g, " ")} detections.`
-                  : "Curated furniture picks suited for your space."}
-              </p>
-            </div>
-            <div className="text-sm font-medium px-4 py-2 bg-muted rounded-full whitespace-nowrap border border-border">
-              {activeProducts.length} item{activeProducts.length !== 1 ? "s" : ""} found
-            </div>
+          <div className="mb-10">
+            <h2 className="text-3xl font-display font-bold mb-2">Smart Product Suggestions</h2>
+            <p className="text-muted-foreground">
+              {activeLabel
+                ? `Real-time furniture picks suited for your ${activeLabel.replace(/_/g, " ")} detections.`
+                : "Real-time furniture picks from Amazon, curated based on your floor plan analysis."}
+            </p>
           </div>
 
-          {activeProducts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              <AnimatePresence mode="popLayout">
-                {activeProducts.map(product => (
-                  <motion.div
-                    key={product.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <ProductCard product={product} />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          ) : (
-            <div className="text-center py-20 bg-card rounded-2xl border border-dashed border-border">
-              <p className="text-lg text-muted-foreground">No products found for this selection.</p>
-            </div>
-          )}
+          <div className="flex flex-col gap-16">
+            {categories
+              .filter(cat => !activeLabel || cat.label === activeLabel)
+              .map(({ label }) => {
+                // Get all unique products for this label from detections
+                const products = currentPlan.detections
+                  .filter(d => d.label === label)
+                  .flatMap(d => d.products)
+                  .filter((p, index, self) => 
+                     index === self.findIndex((t) => t.productLink === p.productLink)
+                  );
+
+                const catColor = getFurnitureColor(label);
+
+                return (
+                  <div key={label} className="space-y-6">
+                    <div className="flex items-center justify-between border-b border-border/50 pb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 rounded-lg shadow-sm flex items-center justify-center" style={{ backgroundColor: catColor }}>
+                           <div className="w-2 h-2 rounded-full bg-black/20" />
+                        </div>
+                        <h3 className="text-2xl font-display font-bold capitalize">
+                          {label.replace(/_/g, " ")} <span className="text-muted-foreground font-normal ml-2">Recommendations</span>
+                        </h3>
+                      </div>
+                      
+                    </div>
+
+                    {products.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                        <AnimatePresence mode="popLayout">
+                          {products.map((product, idx) => (
+                            <motion.div
+                              key={`${label}-${product.id || idx}`}
+                              layout
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.3, delay: idx * 0.05 }}
+                            >
+                              <ProductCard product={product} />
+                            </motion.div>
+                          ))}
+                        </AnimatePresence>
+                      </div>
+                    ) : (
+                      <div className="py-10 text-center bg-muted/20 rounded-2xl border border-dashed border-border/50">
+                        <p className="text-muted-foreground flex flex-col items-center gap-2">
+                          <span>No specific products found for this section.</span>
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+          </div>
         </div>
       </div>
     </Layout>

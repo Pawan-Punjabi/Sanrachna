@@ -2,7 +2,7 @@ import { Layout } from "@/components/Layout";
 import { UploadZone } from "@/components/UploadZone";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
-import { ArrowRight, UploadCloud, ScanSearch, ShoppingBag } from "lucide-react";
+import { ArrowRight, UploadCloud, ScanSearch, ShoppingBag, Scan } from "lucide-react";
 
 export function Home() {
   return (
@@ -37,12 +37,12 @@ export function Home() {
                   Start Analyzing
                   <ArrowRight size={18} />
                 </Link>
-                <a
-                  href="#how-it-works"
+                <button
+                  onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
                   className="inline-flex items-center gap-2 px-6 py-3 border border-border text-foreground font-medium rounded-lg hover:bg-muted transition-all duration-200 w-fit"
                 >
                   How it works
-                </a>
+                </button>
               </div>
             </motion.div>
 
@@ -140,6 +140,74 @@ export function Home() {
                 </motion.div>
               ))}
             </div>
+            
+            {/* 2D to 3D Generator Feature Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="mt-24 p-8 lg:p-12 rounded-[2.5rem] bg-gradient-to-br from-accent/10 via-background to-accent/5 border border-accent/20 relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl -mr-32 -mt-32" />
+              <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -ml-32 -mb-32" />
+
+              <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-bold uppercase tracking-wider mb-6">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
+                    </span>
+                    New Feature
+                  </div>
+                  <h2 className="text-3xl lg:text-4xl font-display font-bold mb-6 leading-tight">
+                    Experience your space in <span className="text-accent">Immersive 3D</span>
+                  </h2>
+                  <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
+                    Our advanced AI doesn't just analyze — it reconstructs. Convert your flat 2D floor plans into fully navigable 3D digital twins with realistic textures and furniture placement.
+                  </p>
+                  <ul className="space-y-4 mb-10">
+                    {[
+                      "Instant 2D to 3D reconstruction",
+                      "Photorealistic lighting and textures",
+                      "Interactive walkthrough experience",
+                      "Exportable structural data"
+                    ].map((feature, idx) => (
+                      <li key={idx} className="flex items-center gap-3 text-foreground/80">
+                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center">
+                          <div className="w-1.5 h-1.5 rounded-full bg-accent" />
+                        </div>
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    href="/generate-3d-floorplan"
+                    className="inline-flex items-center gap-2 px-8 py-4 bg-foreground text-background font-semibold rounded-xl hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-accent/20"
+                  >
+                    Try 3D Generator
+                    <ArrowRight size={20} />
+                  </Link>
+                </div>
+
+                <div className="relative group">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-accent to-primary rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                  <div className="relative aspect-video rounded-2xl bg-muted border border-border overflow-hidden shadow-2xl flex items-center justify-center">
+                    {/* Placeholder for 3D Demo / Image */}
+                    <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80')] bg-cover bg-center opacity-60 mix-blend-overlay" />
+                    <div className="relative z-10 flex flex-col items-center gap-4">
+                      <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 animate-bounce">
+                        <Scan size={32} className="text-white" />
+                      </div>
+                      <span className="text-white font-medium tracking-wide uppercase text-sm bg-black/20 px-4 py-1 rounded-full backdrop-blur-sm">
+                        Live AI Rendering
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
 
             {/* CTA below How It Works */}
             <motion.div

@@ -34,6 +34,7 @@ export function UploadZone() {
   const [state, setState] = useState<UploadState>("idle");
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
+  const [imageUrl, setImageUrl] = useState("");
   const { session } = useAuth();
 
   const maxFiles = 1;
@@ -73,6 +74,40 @@ export function UploadZone() {
       }, 1200);
     }
   }, [setLocation, maxFiles, session]);
+
+  const handleUrlSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!imageUrl) return;
+
+    setError(null);
+    setState("scanning");
+
+    const accessToken = session?.access_token;
+    try {
+      const res = await fetch(api.floorPlans.upload.path, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(accessToken ? { "Authorization": `Bearer ${accessToken}` } : {}),
+        },
+        body: JSON.stringify({ url: imageUrl }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || "Upload failed");
+      }
+
+      const data = await res.json();
+      setState("success");
+      setTimeout(() => {
+        setLocation(`/result/${data.id}`);
+      }, 1200);
+    } catch (err: any) {
+      setError(err?.message || "Failed to analyze link.");
+      setState("error");
+    }
+  };
 
   const { getRootProps, getInputProps, isDragActive, isDragReject } = useDropzone({
     onDrop,
@@ -186,6 +221,35 @@ export function UploadZone() {
             transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
           />
         )}
+      </div>
+
+      <div className="mt-6">
+        <div className="relative flex items-center">
+          <div className="flex-grow h-px bg-border"></div>
+          <span className="flex-shrink-0 px-4 text-xs text-muted-foreground font-medium uppercase tracking-widest">or</span>
+          <div className="flex-grow h-px bg-border"></div>
+        </div>
+
+        <form onSubmit={handleUrlSubmit} className="mt-6 flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1 group">
+            <Scan className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-accent transition-colors" size={18} />
+            <input
+              type="url"
+              placeholder="Paste image link (Google Images, etc.)"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              className="w-full pl-11 pr-4 py-3 bg-muted/50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all"
+              disabled={isScanning || isSuccess}
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={!imageUrl || isScanning || isSuccess}
+            className="px-6 py-3 bg-foreground text-background font-medium rounded-xl hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          >
+            Analyze Link
+          </button>
+        </form>
       </div>
 
       {isError && error && (
