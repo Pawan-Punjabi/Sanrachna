@@ -8,4 +8,5 @@ vite.config.ts.*
 .local/
 dev_output.txt
 uploads/
+attached_assets/
 

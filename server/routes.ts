@@ -344,7 +344,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            api_key: 'Kga1QxiZnr9ZAlRWfeQH',
+            api_key: ROBOFLOW_API_KEY,
             inputs: {
               "image": { "type": "base64", "value": base64Image }
             }

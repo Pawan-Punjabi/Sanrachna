@@ -214,13 +214,6 @@ export function UploadZone() {
           )}
         </AnimatePresence>
 
-        {isScanning && (
-          <motion.div
-            className="absolute left-0 right-0 h-0.5 bg-accent/80 shadow-[0_0_20px_4px_rgba(200,130,103,0.4)] z-0"
-            animate={{ top: ["0%", "100%", "0%"] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-          />
-        )}
       </div>
 
       <div className="mt-6">
